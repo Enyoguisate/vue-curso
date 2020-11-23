@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script src="http://unpkg.com/vue"></script>
+        <title>Shopping List App</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+        <style>
+            li span:hover {
+                cursor: pointer;
+            }
+            .character-counter {
+                border: 1px solid #ced4da;
+                height: 38px;
+                width: 70px;
+            }
+
+            .character-counter-span {
+                margin-left: 10px;
+                margin-top: 5px;
+                overflow: hidden;
+            }
+
+            .high-priority {
+                color: red;
+            }
+
+            .low-priority {
+                color: blue;
+            }
+        </style>
+        <link
+            rel="stylesheet"
+            href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
+            integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p"
+            crossorigin="anonymous"
+        />
+    </head>
+    <body>
+        <div id="shopping-list" class="container">
+            <div class="mt-5">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="container">
+                            <h1 class="d-inline-block">{{ header ? header : 'welcome' }}</h1>
+                            <div class="float-right pt-2 mr-0 pr-0">
+                                <button v-if="state === 'default'" @click="changeState('edit')" class="btn btn-primary">
+                                    Change
+                                </button>
+                                <button v-else class="btn btn-danger" @click="changeState('default')">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="add-item-form">
+                            <div class="row" v-if="state !== 'default'">
+                                <div class="col-12 input-group">
+                                    <input
+                                        v-bind:class="[showError ? 'form-control is-invalid' : 'form-control']"
+                                        type="text"
+                                        v-model="newItem"
+                                        placeholder="Add an item"
+                                        @keyup.enter="addItem()"
+                                        @input="checkErrors()"
+                                    />
+                                    <div class="input-group-append character-counter" >
+                                        <span class="character-counter-span"> {{ characterCount }} / 200 </span>
+                                    </div>
+                                    <div class="input-group-append" >
+                                        <button
+                                            class="btn btn-primary"
+                                            @click="addItem()"
+                                            v-if="!isEdit"
+                                            v-bind:disabled="newItem.length === 0"
+                                        >
+                                            Save Item
+                                        </button>
+                                        <button
+                                            class="btn btn-primary"
+                                            @click="editItem()"
+                                            v-if="isEdit"
+                                            v-bind:disabled="newItem.length === 0"
+                                        >
+                                            Edit Item
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <div class="form-check p-2 pl-4">
+                                            <input class="form-check-input" type="checkbox" id="gridCheck" v-model="isHighPriority"/>
+                                            <label class="form-check-label" for="gridCheck"> Is High Priority </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12" v-if="showError">
+                                    <p style="color: red">No se puede agregar un item vacio</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- <a v-bind:href="newItem" target="_blank" v-if="state !== 'default'">Dynamic Link</a> -->
+                        <ul class="pl-0 pt-3 list-group list-group-flush">
+                            <li class="list-group-item" v-for="item in reversedItems">
+                                <span
+                                    class="badge badge-primary badge-pill"
+                                    v-if="!item.purchased"
+                                    @click="purchaseItem(item)"
+                                    ><i class="fa fa-times"></i
+                                ></span>
+                                <span
+                                    class="badge badge-warning badge-pill"
+                                    v-if="item.purchased"
+                                    @click="purchaseItem(item)"
+                                    ><i class="fa fa-check"></i
+                                ></span>
+                                <span
+                                    @click="setEditItem(item)"
+                                    v-bind:class="[item.purchased ? 'text-warning' : 'text-primary']"
+                                >
+                                    <del v-if="item.purchased">{{item.label}}</del>
+                                    <span
+                                        v-if="!item.purchased"
+                                        :class="[item.highPriority ? 'high-priority' : 'low-priority']"
+                                        >{{item.label}}</span
+                                    >
+                                </span>
+                                <span class="float-right" @click="deleteItem(item)" v-if="state !== 'default'">
+                                    <i class="fa fa-times"></i>
+                                </span>
+                            </li>
+                        </ul>
+                        <div class="alert alert-primary" v-if="items.length === 0">
+                            <p class="warning">I'm empty please add some items</p>
+                        </div>
+                        <div class="alert alert-primary" v-if="items.length === 0">
+                            <p class="bold">Congratulations you've bought all your items!!!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            var shoppingList = new Vue({
+                el: "#shopping-list",
+                data: {
+                    header: "Shopping List",
+                    newItem: "",
+                    items: [
+                        {
+                            label: "10 party hats",
+                            purchased: false,
+                            highPriority: false,
+                        },
+                        {
+                            label: "5 cups",
+                            purchased: false,
+                            highPriority: false,
+                        },
+                        {
+                            label: "2 Board games",
+                            purchased: false,
+                            highPriority: true,
+                        },
+                    ],
+                    showError: false,
+                    isEdit: false,
+                    itemToEdit: null,
+                    state: "default",
+                    isHighPriority: false
+                },
+                computed: {
+                    characterCount: function () {
+                        return this.newItem.length;
+                    },
+                    reversedItems: function () {
+                        return this.items.slice(0).reverse();
+                    },
+                },
+                methods: {
+                    addItem: function () {
+                        this.showError = false;
+                        this.checkErrors();
+                        if (this.checkErrors) {
+                            this.items.push({ label: this.newItem, purchased: false, highPriority: this.isHighPriority });
+                            this.newItem = "";
+                        }
+                    },
+                    checkErrors: function () {
+                        this.showError = this.newItem.trim() === "";
+                    },
+                    deleteItem: function (item) {
+                        this.deleteItemFromArray(item);
+                    },
+                    setEditItem: function (item) {
+                        if (!item.purchased) {
+                            this.newItem = item.label;
+                            this.itemToEdit = item;
+                            this.isHighPriority = item.highPriority;
+                            this.isEdit = true;
+                        }
+                    },
+                    editItem() {
+                        this.addItem();
+                        if (!this.showError) {
+                            this.deleteItemFromArray(this.itemToEdit);
+                            this.isEdit = false;
+                        }
+                    },
+                    deleteItemFromArray: function (item) {
+                        let index = 0;
+                        for (let i = 0; i < this.items.length; i++) {
+                            if (this.items[i].label === item.label) {
+                                index = i;
+                            }
+                        }
+                        this.items.splice(index, 1);
+                    },
+                    changeState: function (state) {
+                        this.state = state;
+                        this.newItem = "";
+                    },
+                    purchaseItem: function (item) {
+                        item.purchased = !item.purchased;
+                    },
+                },
+            });
+        </script>
+    </body>
+</html>
