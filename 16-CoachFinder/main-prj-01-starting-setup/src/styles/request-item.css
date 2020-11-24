@@ -1,0 +1,26 @@
+.ri-li {
+  margin: 1rem 0;
+  border: 1px solid #ccc;
+  padding: 1rem;
+}
+
+.ri-a {
+  color: #3d008d;
+  text-decoration: none;
+  font-weight: bold;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+}
+
+.ri-a:hover,
+.ri-a:active {
+  color: #8d007a;
+  background-color: transparent;
+  border: none;
+}
+
+.ri-p {
+  margin: 0.5rem 0 0 0;
+  color: black;
+}
