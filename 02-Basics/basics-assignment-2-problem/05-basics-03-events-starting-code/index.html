@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vue Basics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://unpkg.com/vue@next" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <h1>Vue Events</h1>
+    </header>
+    <section id="events">
+      <h2>Events in Action</h2>
+      <div class="row">
+        <div class="col">
+          <label for="amount">Enter the amount to add</label>
+        </div>
+        <div class="col">
+          <input type="number" id="amount" v-model="amount" />
+        </div>
+      </div>
+      <button v-on:click="addCounter()">Add {{amount}}</button>
+      <button v-on:click="takeCounter()">Remove {{amount}}</button>
+      <p v-once>First Value: {{ counter }}</p>
+      <p>Last Value: {{ counterLastValue }}</p>
+      <p>Result: {{ counter }}</p>
+      <div class="row">
+        <div class="col-6 d-inline">
+          <label for="firstname">Firstname </label>
+           <!-- <input type="text" id="name" v-bind:value="name" v-on:input="enterName"/> -->
+           <input type="text" id="firstname" v-model="name" />
+        </div>
+        <div class="col-6">
+          <label for="lastname">Lastname </label>
+          <input type="text" id="lastname" v-model="lastname" />
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="col">
+          <button v-on:click="resetInputs">Reset Inputs</button>
+        </div>
+      </div>
+      <div class="row">
+        <p>Your Name: {{ name }}</p>
+        <p>Your Last Name: {{ lastname }}</p>
+        <p>Complete Name: {{ completeName }}</p>
+        <p>Computed Name: {{ fullName }}</p>
+      </div>
+
+      <form>
+        <input type="text" />
+        <button @click="submitForm">Sign up</button>
+      </form>
+    </section>
+  </body>
+</html>
